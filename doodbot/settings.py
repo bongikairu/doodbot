@@ -13,6 +13,11 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+import urlparse
+
+import pymysql
+pymysql.install_as_MySQLdb()
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
@@ -24,9 +29,6 @@ SECRET_KEY = 'c&i@xzr!+wfnf-tg+o5r-i1-i6fpysp)af7&#6p927n+5$vst&'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -50,6 +52,10 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'doodbot.urls'
+
+ALLOWED_HOSTS = ['*']
+CORS_ORIGIN_ALLOW_ALL = True
+USE_X_FORWARDED_HOST = True
 
 TEMPLATES = [
     {
@@ -75,10 +81,27 @@ WSGI_APPLICATION = 'doodbot.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'doodbot',
+        'HOST': '127.0.0.1',
+        'USER': 'root',
+        'PASSWORD': os.environ.get('DBPASS', '')
+    },
 }
+
+if 'DATABASE_URL' in os.environ:
+    url = urlparse.urlparse(os.environ['DATABASE_URL'])
+
+    # Ensure default database exists.
+    DATABASES['default'] = DATABASES.get('default', {})
+
+    DATABASES['default'].update({
+        'NAME': url.path[1:],
+        'USER': url.username,
+        'PASSWORD': url.password,
+        'HOST': url.hostname,
+        'PORT': url.port,
+    })
 
 
 # Password validation
@@ -119,3 +142,5 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+
