@@ -16,6 +16,9 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 
+from bot import views as bot
+
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^webhook$', bot.webhook),
 ]
