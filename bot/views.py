@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 from django.http import HttpResponseBadRequest, HttpResponse
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, StickerSendMessage
 
 from bot.models import Event
 
@@ -38,6 +38,7 @@ def handle_message(event):
 
     auto_stickers = {
         '#น่าเบื่อ': b'bored-hires.png',
+        'น่าเบื่อ': b'bored-hires.png',
     }
 
     for key, value in auto_stickers.items():
@@ -47,6 +48,13 @@ def handle_message(event):
                 event.reply_token,
                 ImageSendMessage(image_url, image_url)
             )
+
+    if event.message.text == 'teststickerkrub':
+        # "packageId": "1305699", "stickerId": "12354168"
+        line_bot_api.reply_message(
+            event.reply_token,
+            StickerSendMessage(b'1305699', b'12354168')
+        )
 
 
 @handler.default()
