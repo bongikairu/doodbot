@@ -36,11 +36,17 @@ def save_message(event):
 def handle_message(event):
     save_message(event)
 
-    if event.message.text == '#น่าเบื่อ':
-        line_bot_api.reply_message(
-            event.reply_token,
-            ImageSendMessage(b'https://doodbot.herokuapp.com/static/bored.png', b'https://doodbot.herokuapp.com/static/bored.png')
-        )
+    auto_stickers = {
+        '#น่าเบื่อ': b'bored-hires.png',
+    }
+
+    for key, value in auto_stickers.items():
+        if event.message.text == key:
+            image_url = b'https://doodbot.herokuapp.com/static/%s' % value
+            line_bot_api.reply_message(
+                event.reply_token,
+                ImageSendMessage(image_url, image_url)
+            )
 
 
 @handler.default()
