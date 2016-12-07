@@ -36,4 +36,4 @@ def webhook(request):
 
 @handler.default()
 def default(event):
-    Event.objects.create(payload=str(event))
+    Event.objects.create(payload=str(event), event_type=event.type)
