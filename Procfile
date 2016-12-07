@@ -1,1 +1,1 @@
-web: python manage.py runserver
+web: web: gunicorn doodbot.wsgi --log-file - -w 2
