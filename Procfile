@@ -1,1 +1,1 @@
-web: web: gunicorn doodbot.wsgi --log-file - -w 2
+web: gunicorn doodbot.wsgi --log-file - -w 2
