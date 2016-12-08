@@ -39,7 +39,7 @@ def handle_message(event):
     auto_stickers = {
         '#น่าเบื่อ': b'bored-hires.png',
         'น่าเบื่อ': b'bored-hires.png',
-        '#เกลียด': b'hate.png',
+        '#เกลียด': b'hate-hires.png',
     }
 
     for key, value in auto_stickers.items():
