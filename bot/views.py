@@ -2,9 +2,11 @@
 
 from __future__ import unicode_literals
 
+import json
+
 from django.http import HttpResponseBadRequest, HttpResponse
 from linebot import LineBotApi, WebhookHandler
-from linebot.exceptions import InvalidSignatureError
+from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, StickerSendMessage
 
 from bot.models import Event
@@ -24,6 +26,19 @@ def webhook(request):
         handler.handle(body, signature)
     except InvalidSignatureError:
         return HttpResponseBadRequest()
+
+    return HttpResponse('ok')
+
+
+def send_text(request, text):
+    last_message = Event.objects.last()  # type: Event
+    payload_str = last_message.payload
+    payload = json.loads(payload_str)
+
+    try:
+        line_bot_api.push_message(payload['source']['groupId'], TextSendMessage(text=text))
+    except LineBotApiError as e:
+        pass
 
     return HttpResponse('ok')
 
