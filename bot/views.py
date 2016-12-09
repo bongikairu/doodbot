@@ -57,6 +57,11 @@ def handle_message(event):
         '#เกลียด': b'hate-hires.png',
     }
 
+    auto_text_reply = {
+        'ใช่ไหมบอท': 'ครับ ใช่ครับ',
+        'ต้นแย่': 'ต้นแย่',
+    }
+
     for key, value in auto_stickers.items():
         if event.message.text == key:
             image_url = b'https://doodbot.herokuapp.com/static/%s' % value
@@ -65,17 +70,18 @@ def handle_message(event):
                 ImageSendMessage(image_url, image_url)
             )
 
+    for key, value in auto_text_reply.items():
+        if event.message.text == key:
+            line_bot_api.reply_message(
+                event.reply_token,
+                TextSendMessage(value)
+            )
+
     if event.message.text == 'teststickerkrub':
         # "packageId": "1305699", "stickerId": "12354168"
         line_bot_api.reply_message(
             event.reply_token,
             StickerSendMessage(b'1305699', b'12354168')
-        )
-
-    if event.message.text == 'ใช่ไหมบอท':
-        line_bot_api.reply_message(
-            event.reply_token,
-            TextSendMessage('ครับ ใช่ครับ')
         )
 
 
