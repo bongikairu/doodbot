@@ -72,6 +72,12 @@ def handle_message(event):
             StickerSendMessage(b'1305699', b'12354168')
         )
 
+    if event.message.text == 'ใช่ไหมบอท':
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage('ครับ ใช่ครับ')
+        )
+
 
 @handler.default()
 def default(event):
