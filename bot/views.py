@@ -63,6 +63,19 @@ def handle_message(event):
         'ต้นแย่': 'ต้นแย่',
     }
 
+    ask_for_food = {
+        1: 'สปาเก็ตตี้ก็ดีนะ',
+        2: 'พิซซ่าดีไหมครับ',
+        3: 'ผัดกะเพราสิ',
+        4: 'ไปทาซึก็ไม่เลว',
+        5: 'ไข่เจียวก็พอมั้งวันนี้',
+        6: 'อะไรก็ได้ไหมครับ เห็นคนชอบกินกัน',
+        7: 'หมึกผัดไข่เค็ม',
+        8: 'เนื้อย่างแล้วกันนะมื้อนี้',
+        9: 'สลัดดีไหม กินผักบ้างก็ดีนะ',
+        10: 'คิดเองบ้างนะครับ',
+    }
+
     for key, value in auto_stickers.items():
         if event.message.text == key:
             image_url = b'https://doodbot.herokuapp.com/static/%s' % value
@@ -77,6 +90,12 @@ def handle_message(event):
                 event.reply_token,
                 TextSendMessage(value)
             )
+
+    if event.message.test == 'กินอะไรดีบอท':
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(ask_for_food[random.randint(1,10)])
+        )
 
     if event.message.text == 'teststickerkrub':
         # "packageId": "1305699", "stickerId": "12354168"
