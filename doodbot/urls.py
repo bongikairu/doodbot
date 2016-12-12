@@ -21,6 +21,5 @@ from bot import views as bot
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^webhook$', bot.webhook),
-    url(r'^send_text/(.*)', bot.send_text),
-    url(r'^set_switch/', bot.set_switch),
+    url(r'^sendtext/(.*)', bot.send_text),
 ]
