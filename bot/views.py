@@ -61,7 +61,7 @@ def send_text(request, text):
 
 
 def set_switch(request):
-    cache.set('d20switch', True)
+    cache.set('d20switch', True, None)
     return HttpResponse('ok')
 
 
@@ -82,14 +82,14 @@ def handle_message(event):
     main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
 
     if main_intent == 'open_bot':
-        cache.set('bot_online', True)
+        cache.set('bot_online', True, None)
         line_bot_api.reply_message(
             event.reply_token,
             bot_message('บอททำงานต่อแล้ว')
         )
 
     if main_intent == 'close_bot':
-        cache.set('bot_online', False)
+        cache.set('bot_online', False, None)
         line_bot_api.reply_message(
             event.reply_token,
             bot_message('บอทหยุดทำงานชั่วคราวแล้ว')
@@ -116,7 +116,7 @@ def handle_message(event):
         '#d20': random.randint(1, 20) if not cache.get('d20switch') else 20,
     }
 
-    cache.set('d20switch', False)
+    cache.set('d20switch', False, None)
 
     ask_for_food = {
         1: 'สปาเก็ตตี้ก็ดีนะ',
