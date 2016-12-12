@@ -12,11 +12,15 @@ from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSend
 
 from bot.models import Event
 
+from wit import Wit
+
 CHANNEL_ACCESS_TOKEN = b'UIbiQYKRHMHHOkk/q5pRonLGBLd3KXccS2HkZyjK0TaZbItNj9KfChtOMI5t2+RkuwFpSticEhy4gQy/1qlnhb38G4dteU8/EJKSp9zuT10RwwM4R4JZOzB2vgEmwXFurLENwCBCSHJPGvQbmIJ/pwdB04t89/1O/w1cDnyilFU='
 CHANNEL_SECRET = b'20f0ee9d35df8630d817a54255605865'
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
+
+wit_client = Wit(access_token='VL225NTUGFQFA77AYFW35U2VPOEO7KA2')
 
 
 def webhook(request):
@@ -31,13 +35,24 @@ def webhook(request):
     return HttpResponse('ok')
 
 
+# noinspection PyTypeChecker
+def bot_message(text):
+    return TemplateSendMessage(text, template={
+        "type": "confirm",
+        "text": text,
+        "actions": [
+
+        ]
+    })
+
+
 def send_text(request, text):
     last_message = Event.objects.last()  # type: Event
     payload_str = last_message.payload
     payload = json.loads(payload_str)
 
     try:
-        line_bot_api.push_message(payload['source']['groupId'], TextSendMessage(text=text))
+        line_bot_api.push_message(payload['source']['groupId'], bot_message(text=text))
     except LineBotApiError as e:
         pass
 
@@ -57,21 +72,17 @@ def save_message(event):
     Event.objects.create(payload=str(event), event_type=event.type)
 
 
-# noinspection PyTypeChecker
-def bot_message(text):
-    return TemplateSendMessage(text, template={
-        "type": "confirm",
-        "text": text,
-        "actions": [
-            
-        ]
-    })
-
-
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     global d20switch
     save_message(event)
+
+    if not hasattr(event, 'message') or not hasattr(event.message, 'text'):
+        return
+
+    # wit.ai NLP
+    resp = wit_client.message(event.message.text)
+    print('Wit.ai response: ' + str(resp))
 
     auto_stickers = {
         '#น่าเบื่อ': b'bored-hires.png',
