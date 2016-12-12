@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import json
+import random
 
 from django.http import HttpResponseBadRequest, HttpResponse
 from linebot import LineBotApi, WebhookHandler
@@ -58,7 +59,7 @@ def handle_message(event):
     }
 
     auto_text_reply = {
-        'ใช่ไหมบอท': 'ครับ ใช่ครับ',
+        'ใช่ไหมบอท': 'ครับ ใช่ครับ' if random.randint(1,4) < 4 else 'ไม่',
         'ต้นแย่': 'ต้นแย่',
     }
 
