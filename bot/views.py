@@ -75,7 +75,7 @@ def handle_message(event):
         '#d8': random.randint(1,8),
         '#d10': random.randint(1,10),
         '#d12': random.randint(1,12),
-        '#d20': random.randint(1,20) if not d20 else 20,
+        '#d20': random.randint(1,20) if not d20switch else 20,
     }
 
     ask_for_food = {
