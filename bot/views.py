@@ -43,13 +43,21 @@ def send_text(request, text):
 
     return HttpResponse('ok')
 
+d20switch = False
+
+def set_switch(request):
+    global d20switch
+    d20switch = True
+    return HttpResponse('ok')
 
 def save_message(event):
     Event.objects.create(payload=str(event), event_type=event.type)
 
 
+
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
+    global d20switch
     save_message(event)
 
     auto_stickers = {
@@ -67,8 +75,7 @@ def handle_message(event):
         '#d8': random.randint(1,8),
         '#d10': random.randint(1,10),
         '#d12': random.randint(1,12),
-        '#d20': random.randint(1,20),
-        '#d20 ': 20,
+        '#d20': random.randint(1,20) if not d20 else 20,
     }
 
     ask_for_food = {
