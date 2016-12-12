@@ -91,7 +91,7 @@ def handle_message(event):
                 TextSendMessage(value)
             )
 
-    if event.message.test == 'กินอะไรดีบอท':
+    if event.message.text == 'กินอะไรดีบอท':
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(ask_for_food[random.randint(1,10)])
