@@ -52,6 +52,8 @@ def save_message(event):
 def handle_message(event):
     save_message(event)
 
+    isDice = re.compile(r'^#d(\d+)\+?(\d*)$')
+
     auto_stickers = {
         '#น่าเบื่อ': b'bored-hires.png',
         'น่าเบื่อ': b'bored-hires.png',
@@ -106,6 +108,14 @@ def handle_message(event):
         line_bot_api.reply_message(
             event.reply_token,
             TextSendMessage(ask_for_food[random.randint(1,10)])
+        )
+
+    if isDice.match(event.message.text):
+        matchObject = re.match(r'^#d(\d+)\+?(\d*)$', event.message.text)
+        result = random.randint(1,matchObject.group(1)) + matchObject.group(2)
+        line_bot_api.reply_message(
+            event.reply_token,
+            TextSendMessage(result)
         )
 
     if event.message.text == 'teststickerkrub':
