@@ -76,8 +76,7 @@ def save_message(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    global d20switch
-    global bot_online
+    global d20switch, bot_online
 
     save_message(event)
 
