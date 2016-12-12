@@ -136,10 +136,28 @@ def handle_message(event):
                 bot_message(value)
             )
 
-    if event.message.text == 'กินอะไรดีบอท':
+    if event.message.text == 'กินอะไรดีบอท' or resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'what_to_eat':
         line_bot_api.reply_message(
             event.reply_token,
             bot_message(ask_for_food[random.randint(1, 10)])
+        )
+
+    if resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'what_time':
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('ตอนนี้กี่โมงก็ดูข้างบนสิครับ')
+        )
+
+    if resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'capability':
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('ลองเอง')
+        )
+
+    if resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'greeting':
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('สวัสดีฮะ')
         )
 
     if event.message.text == 'teststickerkrub':
