@@ -82,7 +82,7 @@ def handle_message(event):
 
     main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
 
-    isDice = re.compile('^#d(\d+)\+?(\d*)$')
+    isDice = re.compile(r'^#d(\d+)\+?(\d*)$')
 
     if main_intent == 'open_bot':
         cache.set('bot_online', True, None)
@@ -184,7 +184,7 @@ def handle_message(event):
         )
 
     if isDice.match(event.message.text):
-        matchObject = re.match('^#d(\d+)\+?(\d*)$', event.message.text)
+        matchObject = re.match(r'^#d(\d+)\+?(\d*)$', event.message.text)
         result = random.randint(1,matchObject.group(1)) + matchObject.group(2)
         line_bot_api.reply_message(
             event.reply_token,
