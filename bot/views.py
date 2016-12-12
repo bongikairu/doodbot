@@ -62,6 +62,12 @@ def handle_message(event):
         'ใช่ไหมบอท': 'ครับ ใช่ครับ' if random.randint(1,4) < 4 else 'ไม่',
         'ต้นแย่': 'ต้นแย่',
         'บอทแย่': 'ไม่ว่าบอทสิครับ บอทก็มีหัวใจนะ' if random.randint(1,10) < 6 else 'ว่าผมทำไมครับ',
+        '#d4': random.randint(1,4),
+        '#d6': random.randint(1,6),
+        '#d8': random.randint(1,8),
+        '#d10': random.randint(1,10),
+        '#d12': random.randint(1,12),
+        '#d20': random.randint(1,20),
     }
 
     ask_for_food = {
