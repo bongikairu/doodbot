@@ -63,11 +63,7 @@ def bot_message(text):
         "type": "confirm",
         "text": text,
         "actions": [
-            {
-                "type": "postback",
-                "label": "*ข้อความบอทของแท้",
-                "data": "bot_message"
-            }
+            
         ]
     })
 
