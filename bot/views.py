@@ -8,15 +8,20 @@ import random
 from django.http import HttpResponseBadRequest, HttpResponse
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, StickerSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, StickerSendMessage, TemplateSendMessage
 
+from django.core.cache import cache
 from bot.models import Event
+
+from wit import Wit
 
 CHANNEL_ACCESS_TOKEN = b'UIbiQYKRHMHHOkk/q5pRonLGBLd3KXccS2HkZyjK0TaZbItNj9KfChtOMI5t2+RkuwFpSticEhy4gQy/1qlnhb38G4dteU8/EJKSp9zuT10RwwM4R4JZOzB2vgEmwXFurLENwCBCSHJPGvQbmIJ/pwdB04t89/1O/w1cDnyilFU='
 CHANNEL_SECRET = b'20f0ee9d35df8630d817a54255605865'
 
 line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(CHANNEL_SECRET)
+
+wit_client = Wit(access_token='VL225NTUGFQFA77AYFW35U2VPOEO7KA2')
 
 
 def webhook(request):
@@ -31,16 +36,32 @@ def webhook(request):
     return HttpResponse('ok')
 
 
+# noinspection PyTypeChecker
+def bot_message(text):
+    return TemplateSendMessage(text, template={
+        "type": "confirm",
+        "text": text,
+        "actions": [
+
+        ]
+    })
+
+
 def send_text(request, text):
     last_message = Event.objects.last()  # type: Event
     payload_str = last_message.payload
     payload = json.loads(payload_str)
 
     try:
-        line_bot_api.push_message(payload['source']['groupId'], TextSendMessage(text=text))
+        line_bot_api.push_message(payload['source']['groupId'], bot_message(text=text))
     except LineBotApiError as e:
         pass
 
+    return HttpResponse('ok')
+
+
+def set_switch(request):
+    cache.set('d20switch', True, None)
     return HttpResponse('ok')
 
 
@@ -52,7 +73,30 @@ def save_message(event):
 def handle_message(event):
     save_message(event)
 
-    isDice = re.compile(r'^#d(\d+)\+?(\d*)$')
+    if not hasattr(event, 'message') or not hasattr(event.message, 'text'):
+        return
+
+    # wit.ai NLP
+    resp = wit_client.message(event.message.text)
+
+    main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
+
+    if main_intent == 'open_bot':
+        cache.set('bot_online', True, None)
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('บอททำงานต่อแล้ว')
+        )
+
+    if main_intent == 'close_bot':
+        cache.set('bot_online', False, None)
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('บอทหยุดทำงานชั่วคราวแล้ว')
+        )
+
+    if not cache.get('bot_online'):
+        return
 
     auto_stickers = {
         '#น่าเบื่อ': b'bored-hires.png',
@@ -61,16 +105,18 @@ def handle_message(event):
     }
 
     auto_text_reply = {
-        'ใช่ไหมบอท': 'ครับ ใช่ครับ' if random.randint(1,4) < 4 else 'ไม่',
+        'ใช่ไหมบอท': 'ครับ ใช่ครับ' if random.randint(1, 4) < 4 else 'ไม่',
         'ต้นแย่': 'ต้นแย่',
-        'บอทแย่': 'ไม่ว่าบอทสิครับ บอทก็มีหัวใจนะ' if random.randint(1,10) < 6 else 'ว่าผมทำไมครับ',
-        '#d4': random.randint(1,4),
-        '#d6': random.randint(1,6),
-        '#d8': random.randint(1,8),
-        '#d10': random.randint(1,10),
-        '#d12': random.randint(1,12),
-        '#d20': random.randint(1,20),
+        'บอทแย่': 'ไม่ว่าบอทสิครับ บอทก็มีหัวใจนะ' if random.randint(1, 10) < 6 else 'ว่าผมทำไมครับ',
+        '#d4': random.randint(1, 4),
+        '#d6': random.randint(1, 6),
+        '#d8': random.randint(1, 8),
+        '#d10': random.randint(1, 10),
+        '#d12': random.randint(1, 12),
+        '#d20': random.randint(1, 20) if not cache.get('d20switch') else 20,
     }
+
+    cache.set('d20switch', False, None)
 
     ask_for_food = {
         1: 'สปาเก็ตตี้ก็ดีนะ',
@@ -101,21 +147,37 @@ def handle_message(event):
         if event.message.text == key:
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(value)
+                bot_message(value)
             )
 
-    if event.message.text == 'กินอะไรดีบอท':
+    if main_intent == 'what_to_eat':
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(ask_for_food[random.randint(1,10)])
+            bot_message(ask_for_food[random.randint(1, 10)])
         )
 
-    if isDice.match(event.message.text):
-        matchObject = re.match(r'^#d(\d+)\+?(\d*)$', event.message.text)
-        result = random.randint(1,matchObject.group(1)) + matchObject.group(2)
+    if main_intent == 'what_not_to_eat':
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(result)
+            bot_message('ตึกจุล')
+        )
+
+    if main_intent == 'what_time':
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('ตอนนี้กี่โมงก็ดูข้างบนสิครับ')
+        )
+
+    if main_intent == 'capability':
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('ลองเอง')
+        )
+
+    if main_intent == 'greeting':
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('สวัสดีฮะ')
         )
 
     if event.message.text == 'teststickerkrub':
