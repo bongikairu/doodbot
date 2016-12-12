@@ -77,6 +77,8 @@ def handle_message(event):
         '#d12': random.randint(1,12),
         '#d20': random.randint(1,20) if not d20switch else 20,
     }
+    
+    d20switch = False
 
     ask_for_food = {
         1: 'สปาเก็ตตี้ก็ดีนะ',
