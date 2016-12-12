@@ -116,7 +116,7 @@ def handle_message(event):
         '#d20': random.randint(1, 20) if not cache.get('d20switch') else 20,
     }
 
-    cache.set('bot_online', False)
+    cache.set('d20switch', False)
 
     ask_for_food = {
         1: 'สปาเก็ตตี้ก็ดีนะ',
