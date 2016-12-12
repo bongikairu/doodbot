@@ -10,6 +10,7 @@ from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
 from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, StickerSendMessage, TemplateSendMessage
 
+from django.core.cache import cache
 from bot.models import Event
 
 from wit import Wit
@@ -59,14 +60,8 @@ def send_text(request, text):
     return HttpResponse('ok')
 
 
-d20switch = False
-
-bot_online = True
-
-
 def set_switch(request):
-    global d20switch
-    d20switch = True
+    cache.set('d20switch', True)
     return HttpResponse('ok')
 
 
@@ -76,8 +71,6 @@ def save_message(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    global d20switch, bot_online
-
     save_message(event)
 
     if not hasattr(event, 'message') or not hasattr(event.message, 'text'):
@@ -89,20 +82,20 @@ def handle_message(event):
     main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
 
     if main_intent == 'open_bot':
-        bot_online = True
+        cache.set('bot_online', True)
         line_bot_api.reply_message(
             event.reply_token,
             bot_message('บอททำงานต่อแล้ว')
         )
 
     if main_intent == 'close_bot':
-        bot_online = False
+        cache.set('bot_online', False)
         line_bot_api.reply_message(
             event.reply_token,
             bot_message('บอทหยุดทำงานชั่วคราวแล้ว')
         )
 
-    if not bot_online:
+    if not cache.get('bot_online'):
         return
 
     auto_stickers = {
@@ -120,10 +113,10 @@ def handle_message(event):
         '#d8': random.randint(1, 8),
         '#d10': random.randint(1, 10),
         '#d12': random.randint(1, 12),
-        '#d20': random.randint(1, 20) if not d20switch else 20,
+        '#d20': random.randint(1, 20) if not cache.get('d20switch') else 20,
     }
 
-    d20switch = False
+    cache.set('bot_online', False)
 
     ask_for_food = {
         1: 'สปาเก็ตตี้ก็ดีนะ',
