@@ -65,7 +65,7 @@ def bot_message(text):
         "actions": [
             {
                 "type": "postback",
-                "label": "จากบอท",
+                "label": "*ข้อความบอทของแท้",
                 "data": "bot_message"
             }
         ]
