@@ -8,7 +8,7 @@ import random
 from django.http import HttpResponseBadRequest, HttpResponse
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, StickerSendMessage
+from linebot.models import MessageEvent, TextMessage, TextSendMessage, ImageSendMessage, StickerSendMessage, TemplateSendMessage
 
 from bot.models import Event
 
@@ -43,16 +43,33 @@ def send_text(request, text):
 
     return HttpResponse('ok')
 
+
 d20switch = False
+
 
 def set_switch(request):
     global d20switch
     d20switch = True
     return HttpResponse('ok')
 
+
 def save_message(event):
     Event.objects.create(payload=str(event), event_type=event.type)
 
+
+# noinspection PyTypeChecker
+def bot_message(text):
+    return TemplateSendMessage(text, template={
+        "type": "confirm",
+        "text": text,
+        "actions": [
+            {
+                "type": "postback",
+                "label": "จากบอท",
+                "data": "bot_message"
+            }
+        ]
+    })
 
 
 @handler.add(MessageEvent, message=TextMessage)
@@ -67,17 +84,17 @@ def handle_message(event):
     }
 
     auto_text_reply = {
-        'ใช่ไหมบอท': 'ครับ ใช่ครับ' if random.randint(1,4) < 4 else 'ไม่',
+        'ใช่ไหมบอท': 'ครับ ใช่ครับ' if random.randint(1, 4) < 4 else 'ไม่',
         'ต้นแย่': 'ต้นแย่',
-        'บอทแย่': 'ไม่ว่าบอทสิครับ บอทก็มีหัวใจนะ' if random.randint(1,10) < 6 else 'ว่าผมทำไมครับ',
-        '#d4': random.randint(1,4),
-        '#d6': random.randint(1,6),
-        '#d8': random.randint(1,8),
-        '#d10': random.randint(1,10),
-        '#d12': random.randint(1,12),
-        '#d20': random.randint(1,20) if not d20switch else 20,
+        'บอทแย่': 'ไม่ว่าบอทสิครับ บอทก็มีหัวใจนะ' if random.randint(1, 10) < 6 else 'ว่าผมทำไมครับ',
+        '#d4': random.randint(1, 4),
+        '#d6': random.randint(1, 6),
+        '#d8': random.randint(1, 8),
+        '#d10': random.randint(1, 10),
+        '#d12': random.randint(1, 12),
+        '#d20': random.randint(1, 20) if not d20switch else 20,
     }
-    
+
     d20switch = False
 
     ask_for_food = {
@@ -109,13 +126,13 @@ def handle_message(event):
         if event.message.text == key:
             line_bot_api.reply_message(
                 event.reply_token,
-                TextSendMessage(value)
+                bot_message(value)
             )
 
     if event.message.text == 'กินอะไรดีบอท':
         line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(ask_for_food[random.randint(1,10)])
+            bot_message(ask_for_food[random.randint(1, 10)])
         )
 
     if event.message.text == 'teststickerkrub':
