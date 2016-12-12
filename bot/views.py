@@ -61,6 +61,8 @@ def send_text(request, text):
 
 d20switch = False
 
+bot_online = True
+
 
 def set_switch(request):
     global d20switch
@@ -75,6 +77,8 @@ def save_message(event):
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
     global d20switch
+    global bot_online
+
     save_message(event)
 
     if not hasattr(event, 'message') or not hasattr(event.message, 'text'):
@@ -82,7 +86,25 @@ def handle_message(event):
 
     # wit.ai NLP
     resp = wit_client.message(event.message.text)
-    print('Wit.ai response: ' + str(resp))
+
+    main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
+
+    if main_intent == 'open_bot':
+        bot_online = True
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('บอททำงานต่อแล้ว')
+        )
+
+    if main_intent == 'close_bot':
+        bot_online = False
+        line_bot_api.reply_message(
+            event.reply_token,
+            bot_message('บอทหยุดทำงานชั่วคราวแล้ว')
+        )
+
+    if not bot_online:
+        return
 
     auto_stickers = {
         '#น่าเบื่อ': b'bored-hires.png',
@@ -136,31 +158,31 @@ def handle_message(event):
                 bot_message(value)
             )
 
-    if resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'what_to_eat':
+    if main_intent == 'what_to_eat':
         line_bot_api.reply_message(
             event.reply_token,
             bot_message(ask_for_food[random.randint(1, 10)])
         )
 
-    if resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'what_not_to_eat':
+    if main_intent == 'what_not_to_eat':
         line_bot_api.reply_message(
             event.reply_token,
             bot_message('ตึกจุล')
         )
 
-    if resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'what_time':
+    if main_intent == 'what_time':
         line_bot_api.reply_message(
             event.reply_token,
             bot_message('ตอนนี้กี่โมงก็ดูข้างบนสิครับ')
         )
 
-    if resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'capability':
+    if main_intent == 'capability':
         line_bot_api.reply_message(
             event.reply_token,
             bot_message('ลองเอง')
         )
 
-    if resp.get('entities', {}).get('intent', [{}])[0].get('value', '') == 'greeting':
+    if main_intent == 'greeting':
         line_bot_api.reply_message(
             event.reply_token,
             bot_message('สวัสดีฮะ')
