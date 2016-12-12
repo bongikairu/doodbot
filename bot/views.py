@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import json
 import random
+import re
 
 from django.http import HttpResponseBadRequest, HttpResponse
 from linebot import LineBotApi, WebhookHandler
