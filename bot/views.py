@@ -201,7 +201,8 @@ def handle_message(event):
                 'ไทย': 'Asia/Bangkok',
                 'ญี่ปุ่น': 'Asia/Tokyo',
                 'ซานฟราน': 'America/Los_Angeles',
-                'อังกฤษ': 'Europe/London'
+                'อังกฤษ': 'Europe/London',
+                'ออสเตรีย': 'Europe/Vienna'
             }
 
             tz_str = known_timezone.get(request_timezone, None)
