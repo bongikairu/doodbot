@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'whitenoise.runserver_nostatic',
     'django.contrib.staticfiles',
+    'raven.contrib.django.raven_compat',
     'bot',
 ]
 
@@ -150,3 +151,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+import raven
+
+RAVEN_CONFIG = {
+    'dsn': 'https://187125af2ba44f8092c32f8532aadd7b:ad2b319ab4ca49e396843ae62b44de57@sentry.io/121794',
+    'release': raven.fetch_git_sha(os.path.dirname(os.pardir)),
+}

@@ -9,3 +9,4 @@ whitenoise==3.2.2
 wit
 git+https://github.com/bongikairu/pythainlp.git
 pytz
+raven
