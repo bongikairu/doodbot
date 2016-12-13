@@ -6,6 +6,7 @@ import json
 import os
 import random
 import re
+import googlemaps
 
 import pytz
 from django.utils import timezone
@@ -39,6 +40,10 @@ handler = WebhookHandler(LINE_CHANNEL_SECRET)
 WIT_ACCESS_TOKEN = os.environ.get('WIT_ACCESS_TOKEN', '')
 
 wit_client = Wit(access_token=WIT_ACCESS_TOKEN)
+
+GMAPS_KEY = os.environ.get('GMAPS_KEY', '')
+
+gmaps = googlemaps.Client(key=GMAPS_KEY)
 
 
 def nlp_segment(text):  # type: str
@@ -210,10 +215,19 @@ def handle_message(event):
                 'ซานฟราน': 'America/Los_Angeles',
                 'อังกฤษ': 'Europe/London',
                 'ออสเตรีย': 'Europe/Vienna',
-                'กรุงโซล ': 'Asia/Seoul',
+                'กรุงโซล': 'Asia/Seoul',
             }
 
             tz_str = known_timezone.get(request_timezone, None) or cache.get('timezone_%s' % request_timezone)
+
+            if not tz_str:
+                geocode_result = gmaps.geocode(request_timezone)
+                print(geocode_result)
+                if len(geocode_result) > 0:
+                    location = geocode_result[0]['geometry']['location']
+                    tz_gmap = gmaps.timezone((location['lat'], location['lng']))
+                    print(tz_gmap)
+                    tz_str = tz_gmap['timeZoneId']
 
             if tz_str:
 
