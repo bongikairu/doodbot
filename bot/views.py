@@ -223,7 +223,7 @@ def handle_message(event):
             if not tz_str:
                 geocode_result = gmaps.geocode(request_timezone)
                 print(geocode_result)
-                if len(geocode_result) > 0:
+                if len(geocode_result) > 0 and 'geometry' in geocode_result[0] and 'location' in geocode_result[0]['geometry']:
                     location = geocode_result[0]['geometry']['location']
                     tz_gmap = gmaps.timezone((location['lat'], location['lng']))
                     print(tz_gmap)
@@ -235,7 +235,7 @@ def handle_message(event):
 
                 line_bot_api.reply_message(
                     event.reply_token,
-                    bot_message('ขณะนี้เป็นเวลา %s นาฬิกา %s นาที %s วินาที ปี้ป' % (current_time.strftime('%H'), current_time.strftime('%M'), current_time.strftime('%S')))
+                    bot_message('ขณะนี้เป็นเวลา %s นาฬิกา %s นาที %s วินาที ปี้ป (%s)' % (current_time.strftime('%H'), current_time.strftime('%M'), current_time.strftime('%S'), request_timezone))
                 )
             else:
                 line_bot_api.reply_message(
