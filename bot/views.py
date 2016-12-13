@@ -105,6 +105,7 @@ def handle_message(event):
 
     segmented_text = " ".join(segment(text))
     resp = wit_client.message(segmented_text)
+    print(resp)
 
     main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
 
@@ -194,7 +195,9 @@ def handle_message(event):
 
     if main_intent == 'what_time':
 
-        request_timezone = resp.get('entities', {}).get('timezone', [{}])[0].get('value', {}).get('value', '')
+        request_timezone = resp.get('entities', {}).get('timezone', [{}])[0].get('value', '')
+        if type(request_timezone) == dict:
+            request_timezone = request_timezone.get('value', '')
         if request_timezone:
 
             known_timezone = {
