@@ -97,6 +97,11 @@ def set_switch(request):
     return HttpResponse('ok')
 
 
+def set_timezone(request, tz_str, tz_name):
+    cache.set('timezone_%s' % tz_name, tz_str.replace('-', '/'), None)
+    return HttpResponse('ok')
+
+
 def save_message(event):
     Event.objects.create(payload=str(event), event_type=event.type)
 
@@ -146,15 +151,7 @@ def handle_message(event):
         'ใช่ไหมบอท': 'ครับ ใช่ครับ' if random.randint(1, 4) < 4 else 'ไม่',
         'ต้นแย่': 'ต้นแย่',
         'บอทแย่': 'ไม่ว่าบอทสิครับ บอทก็มีหัวใจนะ' if random.randint(1, 10) < 6 else 'ว่าผมทำไมครับ',
-        '#d4': random.randint(1, 4),
-        '#d6': random.randint(1, 6),
-        '#d8': random.randint(1, 8),
-        '#d10': random.randint(1, 10),
-        '#d12': random.randint(1, 12),
-        '#d20': random.randint(1, 20) if not cache.get('d20switch') else 20,
     }
-
-    cache.set('d20switch', False, None)
 
     ask_for_food = [
         'สปาเก็ตตี้ก็ดีนะ',
@@ -212,10 +209,11 @@ def handle_message(event):
                 'ญี่ปุ่น': 'Asia/Tokyo',
                 'ซานฟราน': 'America/Los_Angeles',
                 'อังกฤษ': 'Europe/London',
-                'ออสเตรีย': 'Europe/Vienna'
+                'ออสเตรีย': 'Europe/Vienna',
+                'กรุงโซล ': 'Asia/Seoul',
             }
 
-            tz_str = known_timezone.get(request_timezone, None)
+            tz_str = known_timezone.get(request_timezone, None) or cache.get('timezone_%s' % request_timezone)
 
             if tz_str:
 
@@ -250,7 +248,7 @@ def handle_message(event):
         )
 
     # regular expression for dice
-    dice_reg = r'^#([0-9]+)?d([0-9]+)(\+([0-9]+))?'
+    dice_reg = r'^#?([0-9]+)?d([0-9]+)(\+([0-9]+))?'
     matchObject = re.match(dice_reg, event.message.text)
     if matchObject:
         dice_count = int(matchObject.group(1) or '1')
@@ -260,7 +258,7 @@ def handle_message(event):
             if dice_count <= 100:
                 result = 0
                 for i in range(dice_count):
-                    result += random.randint(1, dice_type)
+                    result += random.randint(1, dice_type) if not cache.get('d20switch') else dice_type
                 result += dice_add
             else:
                 result = 'เยอะขนาดนั้นไปทอยเอาเองนะครับ'
@@ -278,6 +276,8 @@ def handle_message(event):
             event.reply_token,
             StickerSendMessage('1305699', '12354168')
         )
+
+    cache.set('d20switch', False, None)
 
 
 @handler.default()
