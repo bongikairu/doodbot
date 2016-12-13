@@ -113,7 +113,7 @@ def handle_message(event):
 
     text = event.message.text
 
-    segmented_text = " ".join(segment(text))
+    segmented_text = " ".join(nlp_segment(text))
     resp = wit_client.message(segmented_text)
     print(resp)
 
