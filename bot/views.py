@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import json
+import os
 import random
 import re
 
@@ -15,14 +16,17 @@ from django.core.cache import cache
 from bot.models import Event
 
 from wit import Wit
+from pythainlp.segment import segment
 
-CHANNEL_ACCESS_TOKEN = b'UIbiQYKRHMHHOkk/q5pRonLGBLd3KXccS2HkZyjK0TaZbItNj9KfChtOMI5t2+RkuwFpSticEhy4gQy/1qlnhb38G4dteU8/EJKSp9zuT10RwwM4R4JZOzB2vgEmwXFurLENwCBCSHJPGvQbmIJ/pwdB04t89/1O/w1cDnyilFU='
-CHANNEL_SECRET = b'20f0ee9d35df8630d817a54255605865'
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
+LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET')
 
-line_bot_api = LineBotApi(CHANNEL_ACCESS_TOKEN)
-handler = WebhookHandler(CHANNEL_SECRET)
+line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
+handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-wit_client = Wit(access_token='VL225NTUGFQFA77AYFW35U2VPOEO7KA2')
+WIT_ACCESS_TOKEN = os.environ.get('WIT_ACCESS_TOKEN')
+
+wit_client = Wit(access_token=WIT_ACCESS_TOKEN)
 
 
 def webhook(request):
@@ -78,7 +82,11 @@ def handle_message(event):
         return
 
     # wit.ai NLP
-    resp = wit_client.message(event.message.text)
+
+    text = event.message.text
+
+    segmented_text = " ".join(segment(text))
+    resp = wit_client.message(segmented_text)
 
     main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
 
@@ -201,7 +209,7 @@ def handle_message(event):
         # "packageId": "1305699", "stickerId": "12354168"
         line_bot_api.reply_message(
             event.reply_token,
-            StickerSendMessage(b'1305699', b'12354168')
+            StickerSendMessage('1305699', '12354168')
         )
 
 
