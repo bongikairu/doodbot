@@ -18,13 +18,13 @@ from bot.models import Event
 from wit import Wit
 from pythainlp.segment import segment
 
-LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', b'').decode('utf-8')
-LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET', b'').decode('utf-8')
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', '')
+LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET', '')
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-WIT_ACCESS_TOKEN = os.environ.get('WIT_ACCESS_TOKEN', b'').decode('utf-8')
+WIT_ACCESS_TOKEN = os.environ.get('WIT_ACCESS_TOKEN', '')
 
 wit_client = Wit(access_token=WIT_ACCESS_TOKEN)
 
