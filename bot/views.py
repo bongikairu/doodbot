@@ -247,6 +247,7 @@ def handle_message(event):
 
         if int(matchObject.group(2)) in [4, 6, 8, 10, 12, 20, 100]:
             if int(matchObject.group(1)) <= 100:
+                result = 0
                 for i in range(int(matchObject.group(1))):
                     result += random.randint(1, int(matchObject.group(2)))
 
