@@ -7,6 +7,9 @@ import os
 import random
 import re
 
+import pytz
+from django.utils import timezone
+
 from django.http import HttpResponseBadRequest, HttpResponse
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
@@ -40,6 +43,7 @@ def nlp_segment(text):  # type: str
     return parts
 
 
+print("Current datetime is %s (Los Angeles time)" % timezone.now().astimezone(pytz.timezone('America/Los_Angeles')).strftime('%X %x'))
 print(nlp_segment('เริ่มต้นการทำงานของบอท กำลังทดสอบการ segment ข้อความภาษาไทยนะครับ'))
 
 
@@ -189,10 +193,38 @@ def handle_message(event):
         )
 
     if main_intent == 'what_time':
-        line_bot_api.reply_message(
-            event.reply_token,
-            bot_message('ตอนนี้กี่โมงก็ดูข้างบนสิครับ')
-        )
+
+        request_timezone = resp.get('entities', {}).get('timezone', [{}])[0].get('value', {}).get('value', '')
+        if request_timezone:
+
+            known_timezone = {
+                'ไทย': 'Asia/Bangkok',
+                'ญี่ปุ่น': 'Asia/Tokyo',
+                'ซานฟราน': 'America/Los_Angeles',
+                'อังกฤษ': 'Europe/London'
+            }
+
+            tz_str = known_timezone.get(request_timezone, None)
+
+            if tz_str:
+
+                current_time = timezone.now().astimezone(pytz.timezone(tz_str))
+
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    bot_message('ขณะนี้เป็นเวลา %s นาฬิกา %s นาที %s วินาที ปี้ป' % (current_time.strftime('%H'), current_time.strftime('%M'), current_time.strftime('%S')))
+                )
+            else:
+                line_bot_api.reply_message(
+                    event.reply_token,
+                    bot_message('ไม่รู้ฮะว่าที่นั่นกี่โมง')
+                )
+
+        else:
+            line_bot_api.reply_message(
+                event.reply_token,
+                bot_message('ตอนนี้กี่โมงก็ดูข้างบนสิครับ')
+            )
 
     if main_intent == 'capability':
         line_bot_api.reply_message(
