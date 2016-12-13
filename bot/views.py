@@ -110,7 +110,7 @@ def handle_message(event):
     main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
 
     # regular expression for dice
-    dice_reg = '^#d([0-9]+)\+([0-9]+)$'
+    dice_reg = '^#([0-9]+)d([0-9]+)\+([0-9]+)$'
 
     if main_intent == 'open_bot':
         cache.set('bot_online', True, None)
@@ -245,8 +245,14 @@ def handle_message(event):
     if bool(re.match(dice_reg, event.message.text)):
         matchObject = re.match(dice_reg, event.message.text)
 
-        if int(matchObject.group(1)) in [4, 6, 8, 10, 12, 20, 100]:
-            result = random.randint(1, int(matchObject.group(1))) + int(matchObject.group(2))
+        if int(matchObject.group(2)) in [4, 6, 8, 10, 12, 20, 100]:
+            if int(matchObject.group(1)) <= 100:
+                for i in range(int(matchObject.group(1)))
+                    result += random.randint(1, int(matchObject.group(2)))
+
+                result += int(matchObject.group(3))
+            else:
+                result = 'เยอะขนาดนั้นไปทอยเอาเองนะครับ'
         else:
             result = 'ไม่มี'
 
