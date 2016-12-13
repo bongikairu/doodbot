@@ -186,7 +186,12 @@ def handle_message(event):
 
     if bool(re.match(dice_reg,event.message.text)):
         matchObject = re.match(dice_reg, event.message.text)
-        result = random.randint(1,int(matchObject.group(1))) + int(matchObject.group(2))
+        
+        if matchObject.group(1) in [4,6,8,10,12,20,100]:
+            result = random.randint(1,int(matchObject.group(1))) + int(matchObject.group(2))
+        else:
+            result = 'ไม่มี'
+
         line_bot_api.reply_message(
             event.reply_token,
             bot_message(result)
