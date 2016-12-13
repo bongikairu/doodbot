@@ -147,9 +147,9 @@ def handle_message(event):
         return
 
     auto_stickers = {
-        '#น่าเบื่อ': b'bored-hires.png',
-        'น่าเบื่อ': b'bored-hires.png',
-        '#เกลียด': b'hate-hires.png',
+        '#น่าเบื่อ': 'bored-hires.png',
+        'น่าเบื่อ': 'bored-hires.png',
+        '#เกลียด': 'hate-hires.png',
     }
 
     auto_text_reply = {
@@ -177,7 +177,7 @@ def handle_message(event):
 
     for key, value in auto_stickers.items():
         if event.message.text == key:
-            image_url = b'https://doodbot.herokuapp.com/static/%s' % value
+            image_url = 'https://doodbot.herokuapp.com/static/%s' % value
             line_bot_api.reply_message(
                 event.reply_token,
                 ImageSendMessage(image_url, image_url)
