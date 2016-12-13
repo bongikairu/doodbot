@@ -7,4 +7,4 @@ requests==2.12.3
 wheel==0.24.0
 whitenoise==3.2.2
 wit
-pythainlp
+git+https://github.com/bongikairu/pythainlp.git

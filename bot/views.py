@@ -18,15 +18,29 @@ from bot.models import Event
 from wit import Wit
 from pythainlp.segment import segment
 
-LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN')
-LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET')
+LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', b'').decode('utf-8')
+LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET', b'').decode('utf-8')
 
 line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
-WIT_ACCESS_TOKEN = os.environ.get('WIT_ACCESS_TOKEN')
+WIT_ACCESS_TOKEN = os.environ.get('WIT_ACCESS_TOKEN', b'').decode('utf-8')
 
 wit_client = Wit(access_token=WIT_ACCESS_TOKEN)
+
+
+def nlp_segment(text):  # type: str
+    parts = []
+    for part in text.split(" "):
+        try:
+            subparts = segment(part)
+            parts.extend(subparts)
+        except Exception:
+            parts.append(part)
+    return parts
+
+
+print(nlp_segment('เริ่มต้นการทำงานของบอท กำลังทดสอบการ segment ข้อความภาษาไทยนะครับ'))
 
 
 def webhook(request):
@@ -192,11 +206,11 @@ def handle_message(event):
             bot_message('สวัสดีฮะ')
         )
 
-    if bool(re.match(dice_reg,event.message.text)):
+    if bool(re.match(dice_reg, event.message.text)):
         matchObject = re.match(dice_reg, event.message.text)
 
-        if int(matchObject.group(1)) in [4,6,8,10,12,20,100]:
-            result = random.randint(1,int(matchObject.group(1))) + int(matchObject.group(2))
+        if int(matchObject.group(1)) in [4, 6, 8, 10, 12, 20, 100]:
+            result = random.randint(1, int(matchObject.group(1))) + int(matchObject.group(2))
         else:
             result = 'ไม่มี'
 

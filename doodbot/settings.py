@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 
 import os
 
+print("Starting doodbot")
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 from urllib.parse import urlparse
 
