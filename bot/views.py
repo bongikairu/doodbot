@@ -186,8 +186,8 @@ def handle_message(event):
 
     if bool(re.match(dice_reg,event.message.text)):
         matchObject = re.match(dice_reg, event.message.text)
-        
-        if matchObject.group(1) in [4,6,8,10,12,20,100]:
+
+        if int(matchObject.group(1)) in [4,6,8,10,12,20,100]:
             result = random.randint(1,int(matchObject.group(1))) + int(matchObject.group(2))
         else:
             result = 'ไม่มี'
