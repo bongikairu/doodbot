@@ -24,7 +24,16 @@ from pythainlp.segment import segment
 LINE_CHANNEL_ACCESS_TOKEN = os.environ.get('LINE_CHANNEL_ACCESS_TOKEN', '')
 LINE_CHANNEL_SECRET = os.environ.get('LINE_CHANNEL_SECRET', '')
 
-line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
+if os.environ.get('TEST_API', ''):
+    class LineBotApiTest():
+        def reply_message(self, reply_token, data):
+            print(str(data))
+
+
+    line_bot_api = LineBotApiTest()
+else:
+    line_bot_api = LineBotApi(LINE_CHANNEL_ACCESS_TOKEN)
+
 handler = WebhookHandler(LINE_CHANNEL_SECRET)
 
 WIT_ACCESS_TOKEN = os.environ.get('WIT_ACCESS_TOKEN', '')
@@ -94,7 +103,8 @@ def save_message(event):
 
 @handler.add(MessageEvent, message=TextMessage)
 def handle_message(event):
-    save_message(event)
+    if not os.environ.get('TEST_API', ''):
+        save_message(event)
 
     if not hasattr(event, 'message') or not hasattr(event.message, 'text'):
         return
@@ -108,9 +118,6 @@ def handle_message(event):
     print(resp)
 
     main_intent = resp.get('entities', {}).get('intent', [{}])[0].get('value', '')
-
-    # regular expression for dice
-    dice_reg = '^#([0-9]+)d([0-9]+)\+([0-9]+)$'
 
     if main_intent == 'open_bot':
         cache.set('bot_online', True, None)
@@ -149,22 +156,22 @@ def handle_message(event):
 
     cache.set('d20switch', False, None)
 
-    ask_for_food = {
-        1: 'สปาเก็ตตี้ก็ดีนะ',
-        2: 'พิซซ่าดีไหมครับ',
-        3: 'ผัดกะเพราสิ',
-        4: 'ไปทาซึก็ไม่เลว',
-        5: 'ไข่เจียวก็พอมั้งวันนี้',
-        6: 'อะไรก็ได้ไหมครับ เห็นคนชอบกินกัน',
-        7: 'หมึกผัดไข่เค็ม',
-        8: 'เนื้อย่างแล้วกันนะมื้อนี้',
-        9: 'สลัดดีไหม กินผักบ้างก็ดีนะ',
-        10: 'คิดเองบ้างนะครับ',
-        11: 'ทำคาโบนาร่าสิ อย่าใส่ครีมนะ',
-        12: 'เวลาเครียดๆ อย่างนี้ต้องลาบกับเบียร์เท่านั้น',
-        13: 'รสดีเด็ดเถอะ',
-        14: 'จะกินข้าวแล้วเหรอ ผมยังไม่หิวเลย',
-    }
+    ask_for_food = [
+        'สปาเก็ตตี้ก็ดีนะ',
+        'พิซซ่าดีไหมครับ',
+        'ผัดกะเพราสิ',
+        'ไปทาซึก็ไม่เลว',
+        'ไข่เจียวก็พอมั้งวันนี้',
+        'อะไรก็ได้ไหมครับ เห็นคนชอบกินกัน',
+        'หมึกผัดไข่เค็ม',
+        'เนื้อย่างแล้วกันนะมื้อนี้',
+        'สลัดดีไหม กินผักบ้างก็ดีนะ',
+        'คิดเองบ้างนะครับ',
+        'ทำคาโบนาร่าสิ อย่าใส่ครีมนะ',
+        'เวลาเครียดๆ อย่างนี้ต้องลาบกับเบียร์เท่านั้น',
+        'รสดีเด็ดเถอะ',
+        'จะกินข้าวแล้วเหรอ ผมยังไม่หิวเลย',
+    ]
 
     for key, value in auto_stickers.items():
         if event.message.text == key:
@@ -184,7 +191,7 @@ def handle_message(event):
     if main_intent == 'what_to_eat':
         line_bot_api.reply_message(
             event.reply_token,
-            bot_message(ask_for_food[random.randint(1, 10)])
+            bot_message(random.choice(ask_for_food))
         )
 
     if main_intent == 'what_not_to_eat':
@@ -242,16 +249,19 @@ def handle_message(event):
             bot_message('สวัสดีฮะ')
         )
 
-    if bool(re.match(dice_reg, event.message.text)):
-        matchObject = re.match(dice_reg, event.message.text)
-
-        if int(matchObject.group(2)) in [4, 6, 8, 10, 12, 20, 100]:
-            if int(matchObject.group(1)) <= 100:
+    # regular expression for dice
+    dice_reg = r'^#([0-9]+)?d([0-9]+)(\+([0-9]+))?'
+    matchObject = re.match(dice_reg, event.message.text)
+    if matchObject:
+        dice_count = int(matchObject.group(1) or '1')
+        dice_type = int(matchObject.group(2))
+        dice_add = int(matchObject.group(4) or '0')
+        if dice_type in [4, 6, 8, 10, 12, 20, 100]:
+            if dice_count <= 100:
                 result = 0
-                for i in range(int(matchObject.group(1))):
-                    result += random.randint(1, int(matchObject.group(2)))
-
-                result += int(matchObject.group(3))
+                for i in range(dice_count):
+                    result += random.randint(1, dice_type)
+                result += dice_add
             else:
                 result = 'เยอะขนาดนั้นไปทอยเอาเองนะครับ'
         else:
@@ -273,3 +283,13 @@ def handle_message(event):
 @handler.default()
 def default(event):
     save_message(event)
+
+
+if os.environ.get('TEST_API', ''):
+    handle_message(MessageEvent(message=TextMessage(text='ตอนนี้กี่โมงที่ไทยอ่ะบอท')))
+
+try:
+    line_bot_api.push_message('U4b1094667bd89d0d3f18cb28fa105680', bot_message(text='bot started'))
+except LineBotApiError as e:
+    print('Unable to send init msg to kenny')
+    print(e)

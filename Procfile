@@ -1,1 +1,1 @@
-web: PYTHONUNBUFFERED=true gunicorn doodbot.wsgi --log-file - --error-logfile - -w 2
+web: PYTHONUNBUFFERED=true gunicorn doodbot.wsgi --log-file - --error-logfile - -w 1
