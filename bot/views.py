@@ -242,16 +242,18 @@ def handle_message(event):
                     bot_message('ขณะนี้เป็นเวลา %s นาฬิกา %s นาที %s วินาที ปี้ป (%s)' % (current_time.strftime('%H'), current_time.strftime('%M'), current_time.strftime('%S'), request_timezone))
                 )
             else:
-                line_bot_api.reply_message(
-                    event.reply_token,
-                    bot_message('ไม่รู้ฮะว่าที่นั่นกี่โมง')
-                )
+                pass
+                # line_bot_api.reply_message(
+                #     event.reply_token,
+                #     bot_message('ไม่รู้ฮะว่าที่นั่นกี่โมง')
+                # )
 
         else:
-            line_bot_api.reply_message(
-                event.reply_token,
-                bot_message('ตอนนี้กี่โมงก็ดูข้างบนสิครับ')
-            )
+            pass
+            # line_bot_api.reply_message(
+            #     event.reply_token,
+            #     bot_message('ตอนนี้กี่โมงก็ดูข้างบนสิครับ')
+            # )
 
     if main_intent == 'capability':
         line_bot_api.reply_message(
