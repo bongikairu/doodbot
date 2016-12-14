@@ -131,7 +131,7 @@ def handle_message(event):
     confidence = resp.get('entities', {}).get('intent', [{}])[0].get('confidence', 0)
 
     if confidence < 0.95:
-        return
+        main_intent = ''
 
     if main_intent == 'open_bot':
         cache.set('bot_online', True, None)
