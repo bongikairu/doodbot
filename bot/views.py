@@ -75,13 +75,14 @@ def webhook(request):
 
 # noinspection PyTypeChecker
 def bot_message(text):
-    return TemplateSendMessage(text, template={
-        "type": "confirm",
-        "text": text,
-        "actions": [
-
-        ]
-    })
+    return TextSendMessage(text=text)
+    # return TemplateSendMessage(text, template={
+    #     "type": "confirm",
+    #     "text": text,
+    #     "actions": [
+    #
+    #     ]
+    # })
 
 
 def send_text(request, text):
